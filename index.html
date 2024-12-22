@@ -25,7 +25,7 @@
       </aside>
 
       <section id="main">
-        <article id="title-screen">
+        <article id="title-screen" >
           <h2 id="main-title">Welcome !</h2>
           <div id="downloading-bar-wrapper">
             <div id="downloading-bar-container">
@@ -142,6 +142,7 @@
           <div id="narration-idea">
             <p>Now that we have a general idea of your world, let's start the adventure ! If you have an idea of what you want to happen, you can write it here. If not, we'll generate one for you.</p>
             <div id="narration-idea-container">
+              <div id="narration-idea-input-container">
                 <input
                 type="text"
                 id="narration-idea-input"
@@ -150,15 +151,44 @@
                 <div role="button" id="narration-idea-send-button">
                     <p>Send</p>
                 </div>
+              </div>
+              <div class="narration-slider-container">
+                <p>Luck level</p>
+                <input type="range" name="slider" value="0" min="-5" max="5" id="narration-luck-slider">
+              </div>
+              <div class="narration-slider-container">
+                <p>Difficulty level</p>
+                <input type="range" name="slider" value="0" min="-5" max="5" id="narration-difficulty-slider">
+              </div>
             </div>
 
 
+          </div>
+        </article>
+        <article id="generating-scenario" class="hidden">
+          <h2>Generating your adventure</h2>
+          <div id="loader">
+            <div id="steps">
+              <div class="step" id="storyline">
+                <div class="filler"></div>
+              </div>
+              <div class="step" id="backstory">
+                <div class="filler"></div>
+              </div>
+              <div class="step" id="belongings">
+                <div class="filler"></div>
+              </div>
+            </div>
+            <p id="generation-text">Generating your adventure</p>
           </div>
         </article>
         <article id="adventure" class="hidden">
           <div id="adventure-loader"></div>
           <div id="adventure-content-container">
             <p id="adventure-content-text"></p>
+          </div>
+          <div id="story-end-container" class="hidden">
+            <h2>The end</h2>
           </div>
           <div id="user-action-container">
             <p id="what-next">What to do next ?</p>

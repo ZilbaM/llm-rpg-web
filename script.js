@@ -25,7 +25,7 @@ import { generateEndSituation, generateIntroductionSituation, generateNextSituat
 import { markdown } from "./scripts/markdown.js";
 import { rollOutcome } from "./scripts/gameMechanics.js";
 
-// Global generator state
+// Global generator state to prevent concurrent generation processes
 let isGenerating = false;
 
 // Global data structure to hold all generated information
@@ -39,9 +39,11 @@ let gameWorldData = {
   userInput: "",
 };
 
-let userLuck = 5;
-let progressScore = 0;
-let logs = [];
+// User settings for gameplay customization
+let userLuck = 0;
+let userDifficulty = 0;
+let progressScore = 10; // Tracks the progress towards the game's conclusion
+let logs = []; // Stores logs for user visibility
 
 // Helper function to add a log entry
 function addLog(type, content) {
@@ -57,8 +59,9 @@ function updateLastLog(type, content) {
 
 /**
  * On window load:
- *   - Initialize the HuggingFace model.
- *   - Update the progress bar once the model is ready.
+ * - Initialize the HuggingFace model.
+ * - Update the progress bar once the model is ready.
+ * - Set up UI event listeners.
  */
 window.onload = async () => {
   addLog("info", "Initializing model...");
@@ -71,7 +74,7 @@ window.onload = async () => {
   setupScenarioExamples();
 };
 
-// Scenario start button
+// Event listener for the scenario start button
 document
   .getElementById("user-scenario-send-button")
   .addEventListener("click", startWorldBuilding);
@@ -108,6 +111,7 @@ async function startWorldBuilding() {
 async function generateWorld(worldData) {
   console.group("Generating world...");
 
+  // Sequence of generation steps for world-building
   const steps = [
     { step: generateWorldType, key: "worldType" },
     { step: generateRegions, key: "regions" },
@@ -117,6 +121,7 @@ async function generateWorld(worldData) {
     { step: generatePowerSystem, key: "powerSystem" },
   ];
 
+  // Loop through each generation step
   for (const { step, key } of steps) {
     try {
       addLog("generation", `Generating ${key}...`);
@@ -136,9 +141,7 @@ async function generateWorld(worldData) {
 
 /**
  * Regenerate a specific step in the world-building process.
- * @param {Object} worldData - The current state of the world data.
- * @param {string} step - The step to regenerate (e.g., "worldType", "regions").
- * @returns {Promise<Object>} - The updated world data.
+ * Allows selective regeneration while preserving other data.
  */
 async function regenerateWorldStep(worldData, step) {
   if (isGenerating) {
@@ -152,7 +155,7 @@ async function regenerateWorldStep(worldData, step) {
   try {
     switch (step) {
       case "worldType":
-        // If we regenerate the world type, we reset everything else too
+        // Reset all data if the world type is regenerated
         worldData = {
           userInput: worldData.userInput,
           worldType: "",
@@ -167,7 +170,7 @@ async function regenerateWorldStep(worldData, step) {
         break;
 
       case "regions":
-        // Reset relevant fields
+        // Reset dependent fields
         worldData.regions = "";
         worldData.powers = "";
         worldData.population = "";
@@ -242,7 +245,7 @@ async function regenerateWorldStep(worldData, step) {
   return worldData;
 }
 
-// Bind regenerate buttons
+// Bind regenerate buttons for specific world-building steps
 const regenerateButtons = [
   { id: "worldbuilding-review-reload-world-type", key: "worldType" },
   { id: "worldbuilding-review-reload-regions", key: "regions" },
@@ -258,9 +261,10 @@ regenerateButtons.forEach(({ id, key }) => {
   });
 });
 
+// Event listener for the "Next" button in world-building phase
 document.getElementById("worldbuilding-next-button").addEventListener("click", () => {
-  toggleElements("hidden", "worldbuilding", "narration")
-})
+  toggleElements("hidden", "worldbuilding", "narration");
+});
 
 /**
  * Updates the scenario review section of the UI.
@@ -291,15 +295,17 @@ function updateScenarioReview(data) {
   });
 }
 
+// Event listener for starting the narration phase
 document.getElementById("narration-idea-send-button").addEventListener("click", startNarration);
 
-let situationIndex = 0;
+let situationIndex = 0; // Tracks the current story situation
+
 // Generate the scenario
 async function startNarration() {
   if (!isGenerating) {
     isGenerating = true;
 
-    toggleElements("hidden", "narration", "adventure");
+    toggleElements("hidden", "narration", "generating-scenario");
 
     gameWorldData.story = {
       situations: [],
@@ -308,9 +314,16 @@ async function startNarration() {
       storyline: "",
       userInput: document.getElementById('narration-idea-input').value.trim() ? document.getElementById('narration-idea-input').value.trim() : "A quest about finding the artefact and defeating the villain",
     };
-
+    userLuck = Number(document.getElementById('narration-luck-slider').value);
+    addLog('info', `User luck: ${userLuck}`);
+    // If difficulty = 0, set it to 1 to avoid division by zero
+    userDifficulty = Number(document.getElementById('narration-difficulty-slider').value);
+    if (userDifficulty === 0) {
+      userDifficulty = 1;
+    }
+    addLog('info', `User difficulty: ${userDifficulty}`);
     gameWorldData = await generateScenario(gameWorldData, generateResponse);
-
+    toggleElements("hidden", "generating-scenario", "adventure");
     gameWorldData = await generateIntroduction(gameWorldData, generateResponse);
     document.getElementById('adventure-loader').classList.add('hidden');
     updateAdventure(gameWorldData, situationIndex);
@@ -320,23 +333,36 @@ async function startNarration() {
 
 async function generateScenario(worldData, generateResponse) {
   console.group("Generating scenario...");
+  const generationTextHolder = document.getElementById('generation-text');
   try {
     addLog("generation", "Generating storyline...");
+    document.getElementById('storyline').classList.toggle('loading')
+    generationTextHolder.innerText = "Generating storyline...";
     worldData = await generateStoryline(worldData, generateResponse);
+    document.getElementById('storyline').classList.toggle('loading')
+    document.getElementById('storyline').classList.toggle('loaded')
     updateLastLog("success", "Generated storyline.");
   } catch (error) {
     console.error("Error generating scenario:", error);
   }
-
+  
   try {
     addLog("generation", "Generating backstory...");
+    generationTextHolder.innerText = "Generating backstory...";
+    document.getElementById('backstory').classList.toggle('loading')
     worldData = await generateCharacterBackstory(worldData, generateResponse);
+    document.getElementById('backstory').classList.toggle('loading')
+    document.getElementById('backstory').classList.toggle('loaded')
     updateLastLog("success", "Generated backstory.");
   } catch (error) {
     console.error("Error generating backstory:", error);
   }
   try {
     addLog("generation", "Generating belongings...");
+    document.getElementById('belongings').classList.toggle('loading')
+    generationTextHolder.innerText = "Generating initial belongings...";
+    document.getElementById('belongings').classList.toggle('loading')
+    document.getElementById('belongings').classList.toggle('loaded')
     worldData = await generateInitialBelongings(worldData, generateResponse);
     updateLastLog("success", "Generated belongings.");
   } catch (error) {
@@ -399,9 +425,12 @@ async function handleUserAction() {
 
 async function generateNext(worldData, generateResponse) {
   console.group("Generating next situation...");
-  worldData.story.situations[situationIndex].successRoll = rollOutcome(userLuck, 2);
+  worldData.story.situations[situationIndex].successRoll = rollOutcome(userLuck, userDifficulty);
   progressScore += Math.abs(Math.round(worldData.story.situations[situationIndex].successRoll / 2));
-  if (progressScore > 20) {
+  addLog('info', `Progress score: ${progressScore}`);
+  addLog('info', `Success roll: ${worldData.story.situations[situationIndex].successRoll}`);
+  console.log("Success roll:", worldData.story.situations[situationIndex].successRoll);
+  if (progressScore >= 20) {
     addLog('generation', `Generating end situation...`);
     let nextSituation = {
       successRoll: 0,
@@ -416,11 +445,9 @@ async function generateNext(worldData, generateResponse) {
     }
     updateLastLog('success', 'Generated end situation.');
     worldData.story.situations.push(nextSituation);
-    situationIndex++;
+    toggleElements("hidden", "user-action-container", "story-end-container");
     return worldData
   }
-  addLog('info', `Success roll: ${worldData.story.situations[situationIndex].successRoll}`);
-  console.log("Success roll:", worldData.story.situations[situationIndex].successRoll);
   addLog('generation', `Generating next situation...`);
   let nextSituation = {
     successRoll: 0,
