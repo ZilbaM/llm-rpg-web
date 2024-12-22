@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>World Building Adventure</title>
+  </head>
+  <body>
+    <header id="header">
+      <h1>LLM RPG Adventure</h1>
+    </header>
+    <main id="app">
+      <aside id="sidebar" class="active">
+        <img
+          src="./assets/icons/angle-right-solid.svg"
+          id="sidebar-toggle"
+          alt="toggle sidebar icon"
+        />
+        <div id="sidebar-content">
+          <h2>Logs</h2>
+          <ul id="log-list">
+          </ul>
+        </div>
+      </aside>
+
+      <section id="main">
+        <article id="title-screen">
+          <h2 id="main-title">Welcome !</h2>
+          <div id="downloading-bar-wrapper">
+            <div id="downloading-bar-container">
+              <p id="downloading-bar-progress"><span>0%</span></p>
+              <div id="downloading-bar-filler"></div>
+            </div>
+            <p id="downloading-bar-text">Downloading model, please wait...</p>
+          </div>
+          <button disabled id="start-button">Start</button>
+        </article>
+        <article id="worldbuilding" class="hidden">
+          <h2 id="worldbuilding-title">World Building</h2>
+          <div id="worldbuilding-scenario">
+            <p>
+              Let's start with an initial idea for your world. Then, we'll build
+              it step-by-step.
+            </p>
+            <div id="user-scenario-container">
+                <input
+                type="text"
+                id="user-scenario"
+                placeholder="Enter your initial world idea..."
+                />
+                <div id="user-scenario-send-button">
+                    <p>Send</p>
+                </div>
+            </div>
+            <ul id="scenario-examples">
+                <h3>Example scenarios</h3>
+              <li class="scenario-example-item">
+                <p class="scenario-example-text">
+                  A steampunk world of floating islands powered by clockwork engines, connected by airships.
+                </p>
+                <div class="scenario-example-import-icon">
+                  <img src="assets/icons/caret-right-solid.svg" alt="" />
+                </div>
+              </li>
+              <li class="scenario-example-item">
+                <p class="scenario-example-text">
+                  A fantasy world locked in twilight, where rival mage clans draw power from the endless dusk.
+                </p>
+                <div class="scenario-example-import-icon">
+                  <img src="assets/icons/caret-right-solid.svg" alt="" />
+                </div>
+              </li>
+              <li class="scenario-example-item">
+                <p class="scenario-example-text">
+                  A post-apocalyptic world where moon fragments orbit the planet, and nomadic tribes roam the wastelands.
+                </p>
+                <div class="scenario-example-import-icon">
+                  <img src="assets/icons/caret-right-solid.svg" alt="" />
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div id="worldbuilding-review" class="hidden">
+            <p id="worldbuilding-review-idea"></p>
+            <ul id="worldbuilding-review-list">
+              <li class="worldbuilding-review-item" id="worldbuilding-review-world-type-container">
+                <h3>General world description</h3>
+                <div class="worldbuilding-review-loader"></div>
+                <p id="worldbuilding-review-world-type"></p>
+                <div class="worldbuilding-review-reload-icon" id="worldbuilding-review-reload-world-type">
+                  <img src="assets/icons/rotate-left-solid.svg" alt="Regenerate icon button">
+                </div>
+              </li>
+              <li class="worldbuilding-review-item" id="worldbuilding-review-regions-container">
+                <h3>Geographic situation</h3>
+                <div class="worldbuilding-review-loader"></div>
+                <p id="worldbuilding-review-regions"></p>
+                <div class="worldbuilding-review-reload-icon" id="worldbuilding-review-reload-regions">
+                  <img src="assets/icons/rotate-left-solid.svg" alt="Regenerate icon button">
+                </div>
+              </li>
+              <li class="worldbuilding-review-item" id="worldbuilding-review-powers-container">
+                <h3>Factions and powers</h3>
+                <div class="worldbuilding-review-loader"></div>
+                <p id="worldbuilding-review-powers"></p>
+                <div class="worldbuilding-review-reload-icon" id="worldbuilding-review-reload-powers">
+                  <img src="assets/icons/rotate-left-solid.svg" alt="Regenerate icon button">
+                </div>
+              </li>
+              <li class="worldbuilding-review-item" id="worldbuilding-review-resources-container">
+                <h3>Key ressources</h3>
+                <div class="worldbuilding-review-loader"></div>
+                <p id="worldbuilding-review-resources"></p>
+                <div class="worldbuilding-review-reload-icon" id="worldbuilding-review-reload-resources">
+                  <img src="assets/icons/rotate-left-solid.svg" alt="Regenerate icon button">
+                </div>
+              </li>
+              <li class="worldbuilding-review-item" id="worldbuilding-review-population-container">
+                <h3>Population</h3>
+                <div class="worldbuilding-review-loader"></div>
+                <p id="worldbuilding-review-population"></p>
+                <div class="worldbuilding-review-reload-icon" id="worldbuilding-review-reload-population">
+                  <img src="assets/icons/rotate-left-solid.svg" alt="Regenerate icon button">
+                </div>
+              </li>
+              <li class="worldbuilding-review-item" id="worldbuilding-review-power-system-container">
+                <h3>Power system</h3>
+                <div class="worldbuilding-review-loader"></div>
+                <p id="worldbuilding-review-power-system"></p>
+                <div class="worldbuilding-review-reload-icon" id="worldbuilding-review-reload-power-system">
+                  <img src="assets/icons/rotate-left-solid.svg" alt="Regenerate icon button">
+                </div>
+              </li>
+
+            </ul>
+            <button id="worldbuilding-next-button">Confirm world</button>
+          </div>
+        </article>
+        <article id="narration" class="hidden">
+          <h2 id="narration-title">Narration</h2>
+          <div id="narration-idea">
+            <p>Now that we have a general idea of your world, let's start the adventure ! If you have an idea of what you want to happen, you can write it here. If not, we'll generate one for you.</p>
+            <div id="narration-idea-container">
+                <input
+                type="text"
+                id="narration-idea-input"
+                placeholder="Enter your initial story idea or leave blank for random"
+                />
+                <div role="button" id="narration-idea-send-button">
+                    <p>Send</p>
+                </div>
+            </div>
+
+
+          </div>
+        </article>
+        <article id="adventure" class="hidden">
+          <div id="adventure-loader"></div>
+          <div id="adventure-content-container">
+            <p id="adventure-content-text"></p>
+          </div>
+          <div id="user-action-container">
+            <p id="what-next">What to do next ?</p>
+            <div id="user-action-input-container">
+              <input type="text" id="user-action-input">
+              <div role="button" id="user-action-send-button">
+                <p>Send</p>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+    </main>
+
+    <script type="module" src="script.js"></script>
+  </body>
+</html>
